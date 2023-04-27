@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/hex"
 	"io"
 
 	"github.com/arielril/aes/pkg/types"
@@ -44,12 +45,13 @@ func decryptCBC(hexEncryptedMsg, hexKey string) string {
 	if len(encryptedMsg)%aes.BlockSize != 0 {
 		gologger.Fatal().Msgf("encrypted message size is not a multiple of the block size")
 	}
+	gologger.Info().Msgf("using iv=%s\n", hex.EncodeToString(iv))
 
 	mode := cipher.NewCBCDecrypter(aesBlock, []byte(iv))
 	decryptedMsg := make([]byte, len(encryptedMsg))
 	mode.CryptBlocks(decryptedMsg, []byte(encryptedMsg))
 
-	return string(pkcs5Trimming(decryptedMsg))
+	return hex.EncodeToString(pkcs5Trimming(decryptedMsg))
 }
 
 func decryptCTR(hexMsg, hexKey string) string {
@@ -68,6 +70,7 @@ func decryptCTR(hexMsg, hexKey string) string {
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		gologger.Fatal().Msgf("could not read iv value: %s\n", err)
 	}
+	gologger.Info().Msgf("using iv=%s\n", hex.EncodeToString(iv))
 
 	stream := cipher.NewCTR(block, iv)
 	stream.XORKeyStream(decryptedMsg, msg[aes.BlockSize:])

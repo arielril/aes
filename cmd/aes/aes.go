@@ -13,7 +13,7 @@ func main() {
 	configureFlags()
 	validateOptions()
 
-	gologger.Silent().Msg("AES Encryption/Decryption\n\n")
+	gologger.Silent().Msg("AES Encryption & Decryption\n\n")
 
 	if options.Encrypt {
 		aes.Encrypt(options)
@@ -33,7 +33,7 @@ func configureFlags() {
 		set.BoolVarP(&options.Decrypt, "decrypt", "d", false, "run decryption"),
 		set.StringVarP(&options.Message, "message", "m", "", "message to encrypt/decrypt"),
 		set.StringVarP(&options.Key, "key", "k", "", "encryption/decryption key"),
-		set.BoolVar(&options.ModeCBC, "cbc", true, "encrypt/decrypt with CBC Mode"),
+		set.BoolVar(&options.ModeCBC, "cbc", false, "encrypt/decrypt with CBC Mode"),
 		set.BoolVar(&options.ModeCTR, "ctr", false, "encrypt/decrypt with CTR Mode"),
 	)
 
@@ -56,6 +56,10 @@ func validateOptions() {
 	// has message but key wasn't provided
 	if options.Message != "" && options.Key == "" {
 		gologger.Fatal().Msg("encryption key wasn't provided")
+	}
+
+	if !options.ModeCBC && !options.ModeCTR {
+		options.ModeCBC = true
 	}
 }
 
